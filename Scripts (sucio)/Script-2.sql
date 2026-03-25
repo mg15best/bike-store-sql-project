@@ -1,0 +1,1 @@
+ALTER TABLE stocks RENAME TO stg_stocks;
