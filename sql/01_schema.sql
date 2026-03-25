@@ -1,3 +1,100 @@
+-- =========================
+-- STAGING TABLES
+-- =========================
+
+DROP TABLE IF EXISTS stg_brands;
+DROP TABLE IF EXISTS stg_categories;
+DROP TABLE IF EXISTS stg_customers;
+DROP TABLE IF EXISTS stg_order_items;
+DROP TABLE IF EXISTS stg_orders;
+DROP TABLE IF EXISTS stg_products;
+DROP TABLE IF EXISTS stg_staffs;
+DROP TABLE IF EXISTS stg_stocks;
+DROP TABLE IF EXISTS stg_stores;
+
+CREATE TABLE stg_brands (
+    brand_id    INTEGER,
+    brand_name  TEXT
+);
+
+CREATE TABLE stg_categories (
+    category_id    INTEGER,
+    category_name  TEXT
+);
+
+CREATE TABLE stg_customers (
+    customer_id  INTEGER,
+    first_name   TEXT,
+    last_name    TEXT,
+    phone        TEXT,
+    email        TEXT,
+    street       TEXT,
+    city         TEXT,
+    state        TEXT,
+    zip_code     TEXT
+);
+
+CREATE TABLE stg_order_items (
+    order_id    INTEGER,
+    item_id     INTEGER,
+    product_id  INTEGER,
+    quantity    INTEGER,
+    list_price  REAL,
+    discount    REAL
+);
+
+CREATE TABLE stg_orders (
+    order_id       INTEGER,
+    customer_id    INTEGER,
+    order_status   INTEGER,
+    order_date     TEXT,
+    required_date  TEXT,
+    shipped_date   TEXT,
+    store_id       INTEGER,
+    staff_id       INTEGER
+);
+
+CREATE TABLE stg_products (
+    product_id    INTEGER,
+    product_name  TEXT,
+    brand_id      INTEGER,
+    category_id   INTEGER,
+    model_year    INTEGER,
+    list_price    REAL
+);
+
+CREATE TABLE stg_staffs (
+    staff_id    INTEGER,
+    first_name  TEXT,
+    last_name   TEXT,
+    email       TEXT,
+    phone       TEXT,
+    active      INTEGER,
+    store_id    INTEGER,
+    manager_id  TEXT
+);
+
+CREATE TABLE stg_stocks (
+    store_id    INTEGER,
+    product_id  INTEGER,
+    quantity    INTEGER
+);
+
+CREATE TABLE stg_stores (
+    store_id    INTEGER,
+    store_name  TEXT,
+    phone       TEXT,
+    email       TEXT,
+    street      TEXT,
+    city        TEXT,
+    state       TEXT,
+    zip_code    TEXT
+);
+
+-- =========================
+-- CORE TABLES
+-- =========================
+
 DROP TABLE IF EXISTS dim_brands;
 DROP TABLE IF EXISTS dim_categories;
 DROP TABLE IF EXISTS dim_customers;
