@@ -470,28 +470,40 @@ Se creó un trigger `trg_validate_discount` que impide insertar registros en `fc
 
 ### Tratamiento de nulos en los CSV
 
-Los archivos CSV de origen codifican los valores nulos como el texto literal `NULL` en lugar de usar campos vacíos. SQLite importa esos valores como texto, de modo que una columna de tipo TEXT con valor `NULL` no es reconocida como `NULL` real por el motor. Para corregirlo se aplica `NULLIF(columna, 'NULL')` en el paso de transformación (`03_transform_core.sql`) sobre todas las columnas afectadas:
+Los archivos CSV originales contienen valores nulos representados como el texto literal 'NULL'.  
+Durante la fase de transformación (`03_transform_core.sql`), estos valores se convierten en nulos reales mediante el uso de:
 
-- `dim_customers.phone` — 1 267 teléfonos no disponibles
-- `fct_sales.shipped_date` — 508 pedidos pendientes de envío
-- `dim_staffs.manager_id` — 1 empleado sin superior jerárquico (no requería NULLIF porque la afinidad INTEGER de la columna destino ya lo convierte automáticamente)
+NULLIF(columna, 'NULL')
+
+Esto permite que SQLite interprete correctamente los valores faltantes.
+
+Principales casos detectados:
+
+- `dim_customers.phone` — 1 267 valores nulos o teléfonos no disponibles
+- `fct_sales.shipped_date` — 508 pedidos pendientes de envío o sin fecha de envío
+- `dim_staffs.manager_id` — 1 valor nulo, seguramente director general, empleado sin superior jerárquico (no requería NULLIF porque la afinidad INTEGER de la columna destino ya lo convierte automáticamente)
 
 ### Checklist de calidad
 
 | Control | Resultado |
 |---|---|
-| Teléfonos nulos en clientes (`phone IS NULL`) | ✅ 1 267 nulos reales tras conversión de 'NULL' literal |
-| Empleado sin manager (`manager_id IS NULL`) | ✅ 1 nulo esperado (director general) |
-| Pedidos no enviados (`shipped_date IS NULL`) | ✅ 508 nulos reales tras conversión de 'NULL' literal |
-| Valores de descuento fuera del rango [0, 1] | ✅ 0 registros inválidos |
-| Claves huérfanas en `fct_sales` (clientes, productos, tiendas, empleados) | ✅ 0 registros huérfanos |
-| Cantidades negativas o cero en `fct_sales` | ✅ 0 registros inválidos |
-| Precios de lista negativos o cero | ✅ 0 registros inválidos |
-| Duplicados en claves primarias de dimensiones | ✅ 0 duplicados |
-| Pedidos enviados después de la fecha requerida | ⚠️ 458 pedidos retrasados (dato operativo, no error de datos) |
-| Productos sin ninguna venta registrada | ⚠️ 14 productos sin ventas (posible problema de rotación) |
+| Teléfonos nulos en clientes |  1.267 nulos válidos |
+| Empleado sin manager |  1 caso esperado |
+| Pedidos no enviados |  508 registros |
+| Descuentos fuera de rango [0,1] |  0 registros inválidos |
+| Claves huérfanas en fct_sales |  0 registros |
+| Cantidades negativas o cero |  0 registros |
+| Precios inválidos |  0 registros |
+| Duplicados en dimensiones |  0 registros |
 
-Los dos hallazgos marcados en amarillo son insights de negocio relevantes, no errores de carga.
+---
+
+### Insights de negocio derivados
+
+- Se identificaron **458 pedidos distintos enviados después de la fecha requerida**, lo que sugiere posibles ineficiencias logísticas.
+- Se detectaron **14 productos sin ventas**, lo que puede indicar baja rotación o exceso de catálogo.
+
+Estos resultados no representan errores de datos, sino oportunidades de análisis operativo y comercial.
 
 ---
 
