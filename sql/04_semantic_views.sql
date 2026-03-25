@@ -1,5 +1,6 @@
 DROP VIEW IF EXISTS vw_sales_enriched;
 DROP VIEW IF EXISTS vw_store_monthly_kpis;
+DROP VIEW IF EXISTS vw_product_performance;
 
 CREATE VIEW vw_sales_enriched AS
 SELECT
@@ -57,3 +58,31 @@ GROUP BY
     store_id,
     store_name,
     substr(order_date, 1, 7);
+
+CREATE VIEW vw_product_performance AS
+SELECT
+    p.product_id,
+    p.product_name,
+    p.model_year,
+    b.brand_name,
+    cat.category_name,
+    COUNT(DISTINCT fs.order_id)          AS total_orders,
+    COALESCE(SUM(fs.quantity), 0)        AS total_units_sold,
+    ROUND(COALESCE(SUM(fs.sales_amount), 0), 2) AS total_revenue,
+    ROUND(COALESCE(AVG(fs.discount), 0), 4)     AS avg_discount,
+    COALESCE(SUM(st.quantity), 0)        AS total_stock
+FROM dim_products p
+LEFT JOIN dim_brands b
+    ON p.brand_id = b.brand_id
+LEFT JOIN dim_categories cat
+    ON p.category_id = cat.category_id
+LEFT JOIN fct_sales fs
+    ON p.product_id = fs.product_id
+LEFT JOIN fct_stock st
+    ON p.product_id = st.product_id
+GROUP BY
+    p.product_id,
+    p.product_name,
+    p.model_year,
+    b.brand_name,
+    cat.category_name;

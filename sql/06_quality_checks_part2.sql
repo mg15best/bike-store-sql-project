@@ -1,5 +1,7 @@
 -- =========================================================
 -- 1. NULOS EN SHIPPED_DATE
+-- Resultado esperado: 508 (pedidos pendientes de envío,
+-- correctamente convertidos desde el literal 'NULL' del CSV)
 -- =========================================================
 SELECT 
     'null_shipped_date' AS check_name,
@@ -29,6 +31,9 @@ WHERE dp.product_id IS NULL;
 
 -- =========================================================
 -- 4. PEDIDOS RETRASADOS
+-- Cuenta líneas de pedido (no pedidos distintos).
+-- Para contar pedidos únicos:
+--   SELECT COUNT(DISTINCT order_id) → 458 pedidos retrasados
 -- =========================================================
 SELECT 
     'delayed_orders' AS check_name,
